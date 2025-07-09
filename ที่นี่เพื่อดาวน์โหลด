@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Demo Slot – PG‑style</title>
+<style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#111;color:#eee;text-align:center;margin:0;padding:0}
+    h1{color:#fdbb2d;margin-top:30px;font-size:2.2em}
+    #slot{display:flex;justify-content:center;gap:15px;margin:40px auto;font-size:4rem}
+    .reel{width:90px;height:90px;background:#222;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px #000 inset}
+    #controls{margin-top:20px}
+    button{background:#fdbb2d;border:none;border-radius:5px;padding:10px 25px;font-size:1em;cursor:pointer;color:#111;font-weight:bold}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    #credit{font-size:1.3em;margin-top:15px}
+    #log{margin-top:25px;height:120px;overflow-y:auto;background:#181818;border-radius:8px;padding:10px 15px;font-size:.9em;text-align:left;white-space:pre-line}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+</style>
+</head>
+<body>
+    <h1>Demo Slot – PG‑style</h1>
+    <div id="slot">
+        <div class="reel" id="r1">🍒</div>
+        <div class="reel" id="r2">🍒</div>
+        <div class="reel" id="r3">🍒</div>
+    </div>
+    <div id="controls">
+        <button id="spinBtn">SPIN (Bet 1,000)</button>
+    </div>
+    <div id="credit">Credit: 300,000</div>
+    <div id="log"></div>
+
+<script>
+(() => {
+    const symbols = ["🍒","🔔","💎","7️⃣","🍀"];
+    const multipliers = { "🍒":2, "🔔":3, "💎":5, "7️⃣":10, "🍀":20 };
+    let credit = 300000;
+    const bet = 1000;
+    const reels = ["r1","r2","r3"].map(id=>document.getElementById(id));
+    const spinBtn = document.getElementById("spinBtn");
+    const creditEl = document.getElementById("credit");
+    const logEl = document.getElementById("log");
+
+    function log(msg){
+        logEl.textContent = (new Date()).toLocaleTimeString() + " — " + msg + "\n" + logEl.textContent;
+    }
+
+    function updateCredit(){
+        creditEl.textContent = "Credit: " + credit.toLocaleString();
+        spinBtn.disabled = credit < bet;
+    }
+
+    function randomSymbol(){return symbols[Math.floor(Math.random()*symbols.length)];}
+
+    function spin(){
+        if(credit < bet) return;
+        credit -= bet;
+        let result = [];
+        reels.forEach((reel,i)=>{
+            const sym = randomSymbol();
+            result.push(sym);
+            reel.textContent = sym;
+        });
+
+        let payout = 0;
+        if(result.every(s=>s===result[0])){ // all match
+            payout = bet * multipliers[result[0]];
+            credit += payout;
+            log("WIN! " + result[0].repeat(3) + " pays x" + multipliers[result[0]] + " → +" + payout.toLocaleString());
+        } else {
+            log("Lose. " + result.join(" "));
+        }
+        updateCredit();
+    }
+
+    spinBtn.addEventListener("click", spin);
+    updateCredit();
+})();
+</script>
+</body>
+</html>
